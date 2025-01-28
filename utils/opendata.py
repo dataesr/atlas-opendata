@@ -27,6 +27,7 @@ def opendata_atlas(df,annee, CORRECTIFS_dict_esr):
     if annee in ["2014","2013","2012","2011","2010","2009","2008","2007"]:
         df=df[['RENTREE','PAYS_ID','REG_ID','ACA_ID','DEP_ID','UUCR_ID','COM_CODE2','COM_CODE','ETABLI','RGP3','FORMAT','SECT','INSPE','IUT','IUT2','ING','TOTAL','LMDDONT','DISCIPLI','CURSUS_LMD','UNIV','STS_ASS','DUT','SEXE','UUCR_NOM','DEP_NUM_NOM','ACA_NOM','REG_NOM','EFFTOT']]
     elif int(annee) > 2016:
+        print('ok')
         df=df[['RENTREE','PAYS_ID','REG_ID','ACA_ID','DEP_ID','UUCR_ID','COM_CODE2','COM_CODE','ETABLI','RGP3','FORMAT','SECT','INSPE','IUT','IUT2','ING','TOTAL','LMDDONT','DISCIPLI','CURSUS_LMD','UNIV','STS_ASS','DUT','SEXE','UUCR_NOM','DEP_NUM_NOM','ACA_NOM','REG_NOM','EFFTOT','EFFSDC', 'EFF_STS_APP',]]
     elif annee in ["2006","2005","2004","2003","2002","2001"]:
         df=df[['RENTREE','PAYS_ID','REG_ID','ACA_ID','DEP_ID','UUCR_ID','COM_CODE2','COM_CODE','ETABLI','RGP3','FORMAT','SECT','INSPE','IUT','IUT2','ING','TOTAL','UNIV','STS_ASS','DUT','SEXE','UUCR_NOM','DEP_NUM_NOM','ACA_NOM','REG_NOM','EFFTOT']]
@@ -34,11 +35,13 @@ def opendata_atlas(df,annee, CORRECTIFS_dict_esr):
     if annee in ["2014","2013","2012","2011","2010","2009","2008","2007"]:
         df=df.groupby(['RENTREE','PAYS_ID','REG_ID','ACA_ID','DEP_ID','UUCR_ID','COM_CODE2','COM_CODE','ETABLI','RGP3','FORMAT','SECT','INSPE','IUT','IUT2','ING','TOTAL','LMDDONT','DISCIPLI','CURSUS_LMD','UNIV','STS_ASS','DUT','SEXE','UUCR_NOM','DEP_NUM_NOM','ACA_NOM','REG_NOM'], as_index=False, dropna=False).agg({'EFFTOT': 'sum'}) 
     elif int(annee) > 2016:
+        print('ok')
         df=df.groupby(['RENTREE','PAYS_ID','REG_ID','ACA_ID','DEP_ID','UUCR_ID','COM_CODE2','COM_CODE','ETABLI','RGP3','FORMAT','SECT','INSPE','IUT','IUT2','ING','TOTAL','LMDDONT','DISCIPLI','CURSUS_LMD','UNIV','STS_ASS','DUT','SEXE','UUCR_NOM','DEP_NUM_NOM','ACA_NOM','REG_NOM'], as_index=False, dropna=False).agg({'EFFTOT': 'sum','EFFSDC': 'sum', 'EFF_STS_APP':'sum'}) 
     elif annee in ["2006","2005","2004","2003","2002","2001"]:
         df=df.groupby(['RENTREE','PAYS_ID','REG_ID','ACA_ID','DEP_ID','UUCR_ID','COM_CODE2','COM_CODE','ETABLI','RGP3','FORMAT','SECT','INSPE','IUT','IUT2','ING','TOTAL','UNIV','STS_ASS','DUT','SEXE','UUCR_NOM','DEP_NUM_NOM','ACA_NOM','REG_NOM'], as_index=False, dropna=False).agg({'EFFTOT': 'sum'}) 
     df.loc[df['RGP3']=='UNIV_PRIV','RGP3']='EPEU'
     df=df.rename(columns={'DEP_NUM_NOM':'DEP_NOM'})
+    
 
     dict_rentree={}
     dict_annee={}
