@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import pandas as pd
 from datetime import datetime
@@ -5,6 +6,7 @@ from tqdm.notebook import tqdm
 tqdm.pandas()
 
 from utils.correcting_features import corrige_all, corrige_etabli2, corrige_rgp2, corrige_rgp3, corrige_op_ing
+from utils.etablissements import etablissements
 from utils.load_corrections import get_all_correctifs_from_google, load_all_correctifs
 from utils.opendata import opendata_atlas
 from utils.traitements import importtab, gentab
@@ -39,7 +41,7 @@ for rentree_sco in range(2001,current_year):
 
 #concatenate the data for all years
 df1=pd.read_json(f"./OUTPUT_OPENDATA/atlas2001.json")
-for i in range(2002,int(rentree_sco)+1,1):
+for i in range(2002,current_year,1):
     df2=pd.read_json(f"./OUTPUT_OPENDATA/atlas{i}.json")
     df1=pd.concat([df1,df2])
 df=df1.sort_values(by=["rentree"], ascending=False)
@@ -49,15 +51,16 @@ df_com=df_tot
 del df_tot['pays']
 df_tot.to_csv("./OUTPUT_OPENDATA/OD_atlas_all.csv", sep=";", encoding="UTF-8", index=False)
 
-##just the citys
+#just the citys
 df_com=df_com[(df_com.niveau_geo=='COMMUNE')&(df_com.regroupement!='TOTAL')].rename(columns={"geo_id":"com_id", "geo_nom":"com_nom"})
 df_com=pd.merge(df_com,communes[['COM_CODE','UUCR_NOM','DEP_NOM','ACA_NOM','REG_NOM']], how='left', left_on='com_id', right_on='COM_CODE')
 del df_com['niveau_geo']
 del df_com['niveau_geographique']
 df_com.to_csv("./OUTPUT_OPENDATA/OD_atlas_all_com.csv", sep=";", encoding="UTF-8", index=False)
 
-
-
+#etablissements
+df_etab=etablissements(current_year)
+df_etab.to_csv("./OUTPUT_OPENDATA/OD_atlas_etab.csv", sep=";", encoding="UTF-8", index=False)
 
 
 
