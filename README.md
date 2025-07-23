@@ -20,3 +20,9 @@ To use it, first:
 This notebook enable to change the incorrect features and complete the missing ones. At the end of the process, when each year is done: The `POST_GENTAB` folder must have the same number of file as the folder `INPUT`. With these new files, we produce the 'état du supérieur' map.
 
 ## 2. Run the notebook `2_opendata_atlas_total_communes.ipynb`
+
+- Run the notebook with all the details of the code, step by step for the level "communal".
+
+## 3. Run the notebook `3_opendata_atlas_total_etablissements.ipynb`
+
+- Run the notebook step by step, including all code details, using the 'établissement' level, which is much more granular.
