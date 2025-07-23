@@ -25,4 +25,4 @@ This notebook enable to change the incorrect features and complete the missing o
 
 ## 3. Run the notebook `3_opendata_atlas_total_etablissements.ipynb`
 
-- Run the notebook step by step, including all code details, using the 'établissement' level, which is much more granular.
+- Run the notebook step by step, including all code details, using the "établissement" level, which is much more granular.
