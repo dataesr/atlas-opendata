@@ -5,7 +5,7 @@ def importtab(df,CORRECTIFS_dict,CORRECTIFS_dict_esr,corrige_etabli2,corrige_all
     if ('ANNEE' in df.columns) and ('RENTREE' in df.columns):
         df=df.drop(['ANNEE', 'RENTREE'], axis=1)
     df['ANNEE']=str(annee + 1)
-    df['RENTREE']=df['ANNEE']
+    df['RENTREE']=str(annee)
     df['ETABLI']=df.loc[:,'ETABLI'].astype(str)
     df['COMPOS']=df.loc[:,'COMPOS'].astype(str)
     if 'CURSUS_LMD' in df.columns :
