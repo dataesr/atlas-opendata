@@ -96,6 +96,11 @@ def importtab(df,CORRECTIFS_dict,CORRECTIFS_dict_esr,corrige_etabli2,corrige_all
     final_columns=['ANNEE','DEGETU','PAYS_ID','DIPLOM','RENTREE','ENQ','MIN_U', 'MINISTER','SECT','COMPOS','NAT_U','SIGLE_U','LIB1_U','LIB2_U','COM_U','FINECOLE','ETABLI','ETABLI2','ETABLI3','SIGLE_M','LIB1_M','LIB2_M','COM_M','SPECIUT','EFFTOT','EFFTOTN','DC','LMDDONT','LMDDONTBIS','DNDU','DISCIPLI','CURSUS_LMD','FILIERE','ETABLISSEMENT','UNIV','HSIFA','EFFECTIF_SANS_DOUBLE_COMPTE','HCPGE','SEXE','NATION','FORMAT']
     columns=[ x for x in df.columns if x in final_columns]
     df=df[columns]
+    if len(df[df.FORMAT=='None'])>0:
+        df.loc[df.FORMAT=='None','FORMAT']='autr'
+    if len(df[df.FORMAT==''])>0:
+        df.loc[df.FORMAT=='','FORMAT']='com1'
+        df.loc[df.COMPOS=='9830642F','ETABLISSEMENT']='commerce'
     return df
 
 def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, corrige_rgp3, corrige_op_ing):
@@ -103,9 +108,9 @@ def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, 
         a='rentree, a.dc, a.enq, a.MINISTER, a.sect, a.compos, a.nat_u, a.sigle_u, a.lib1_u, a.lib2_u, a.FINECOLE, a.etabli, a.sigle_m, a.lib1_m, a.lib2_m, a.com_u, a.com_m, a.etabli2, a.speciut, a.efftot, a.EFF_STS_APP, a.EFFSDC, a.sexe, a.univ, a.LMDdont, a.LMDdontbis, a.DNDU, a.DISCIPLI, a.CURSUS_LMD, a.filiere, a.etablissement, a.format, a.degetu' 
     else:
         a='rentree, a.dc, a.enq, a.MINISTER, a.sect, a.compos, a.nat_u, a.sigle_u, a.lib1_u, a.lib2_u, a.FINECOLE, a.etabli, a.sigle_m, a.lib1_m, a.lib2_m, a.com_u, a.com_m, a.etabli2, a.speciut, a.efftot, a.EFF_STS_APP, a.EFFSDC, a.sexe, a.univ, a.LMDdont, a.LMDdontbis, a.DNDU, a.DISCIPLI, a.CURSUS_LMD, a.filiere, a.etablissement, a.format'   
-    b='UUCR_ID, b.DEP_ID, b.COM_CODE, b.COM_NOM, b.COM_CODE1, b.COM_CODE2, b.UUCR_NOM, b.SACLAY_ID, b.EPCI_ID, b.DEP_NUM_NOM, b.ACA_ID, b.ACA_NOM, b.REG_ID, b.REG_NOM, b.REGRGP_NOM, b.REG_ID_OLD, b.REG_NOM_OLD'
+    b='UUCR_ID, b.DEP_ID, b.COM_CODE, b.COM_NOM, b.COM_CODE1, b.COM_CODE2, b.UUCR_NOM, b.EPCI_ID, b.DEP_NUM_NOM, b.ACA_ID, b.ACA_NOM, b.REG_ID, b.REG_NOM, b.REGRGP_NOM, b.REG_ID_OLD, b.REG_NOM_OLD'
     d='libell_, d.rgp, d.rgp2, d.rgp3, d.rgp4, d.ING, d.IUT, d.INSPE, d.total, d.format'
-    h=['rentree', 'enq', 'MINISTER','sect', 'COMPOS', 'nat_u', 'sigle_u', 'lib1_u', 'lib2_u', 'COM_CODE','COM_NOM', 'COM_CODE1', 'COM_NOM1', 'COM_CODE2', 'COM_NOM2', 'UUCR_ID','UUCR_NOM', 'SACLAY_ID', 'EPCI_ID', 'DEP_ID', 'DEP_NUM_NOM', 'ACA_ID','ACA_NOM', 'REG_ID', 'REG_NOM', 'REGRGP_NOM', 'REG_ID_OLD','REG_NOM_OLD', 'FINECOLE', 'ETABLI', 'COM_CODE_ETAB', 'sigle_m', 'lib1_m','lib2_m', 'UUCR_ID_etab', 'DEP_ID_etab', 'ETABLI2','format', 'speciut', 'libell_', 'rgp', 'rgp2', 'rgp3','rgp4', 'ING', 'IUT', 'INSPE', 'total','LMDdont', 'LMDdontbis', 'DNDU', 'DISCIPLI', 'CURSUS_LMD', 'filiere','etablissement', 'UNIV', 'SEXE']
+    h=['rentree', 'enq', 'MINISTER','sect', 'COMPOS', 'nat_u', 'sigle_u', 'lib1_u', 'lib2_u', 'COM_CODE','COM_NOM', 'COM_CODE1', 'COM_NOM1', 'COM_CODE2', 'COM_NOM2', 'UUCR_ID','UUCR_NOM', 'EPCI_ID', 'DEP_ID', 'DEP_NUM_NOM', 'ACA_ID','ACA_NOM', 'REG_ID', 'REG_NOM', 'REGRGP_NOM', 'REG_ID_OLD','REG_NOM_OLD', 'FINECOLE', 'ETABLI', 'COM_CODE_ETAB', 'sigle_m', 'lib1_m','lib2_m', 'UUCR_ID_etab', 'DEP_ID_etab', 'ETABLI2','format', 'speciut', 'libell_', 'rgp', 'rgp2', 'rgp3','rgp4', 'ING', 'IUT', 'INSPE', 'total','LMDdont', 'LMDdontbis', 'DNDU', 'DISCIPLI', 'CURSUS_LMD', 'filiere','etablissement', 'UNIV', 'SEXE']
 
     A=[x.upper() for x in a.split(', a.')]+['memeCOM']
     B=[x.upper() for x in b.split(', b.')]
@@ -119,7 +124,7 @@ def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, 
     else:
         H=[x.upper() for x in h]+['memeCOM','memeUUCR']
     
-    dict_df_group={'RENTREE': pd.Int64Dtype(),'ENQ': str,'MINISTER': str,'SECT': str,'COMPOS': str,'NAT_U': str,'SIGLE_U': str,'LIB1_U': str,'LIB2_U': str,'COM_CODE': str,'COM_NOM': str,'COM_CODE1': str,'COM_NOM1': str,'COM_CODE2': str,'COM_NOM2': str,'UUCR_ID': str,'UUCR_NOM': str,'SACLAY_ID': str,'EPCI_ID': str,'DEP_ID': str,'DEP_NUM_NOM': str,'ACA_ID': str,'ACA_NOM': str,'REG_ID': str,'REG_NOM': str,'REG_ID_OLD': str,'REG_NOM_OLD': str,'REGRGP_NOM': str,'FINECOLE': str,'ETABLI': str,'SIGLE_M': str,'LIB1_M': str,'LIB2_M': str,'COM_CODE': str,'COM_CODE_ETAB': str,'UUCR_ID_ETAB': str,'DEP_ID_ETAB': str,'ETABLI2': str,'FORMAT': str,'SPECIUT': str,'LIBELL_': str,'RGP': str,'RGP2': str,'RGP3': str,'RGP4': str,'ING': str,'IUT': str,'INSPE': str,'TOTAL': str,'LMDDONT': str,'LMDDONTBIS': str,'DNDU': str,'DISCIPLI': str,'CURSUS_LMD': str,'FILIERE': str,'ETABLISSEMENT': str,'UNIV': str,'SEXE': str,'memeUUCR': str,'memeCOM': str,'EFFTOT': pd.Int64Dtype(),'EFFSDC': pd.Int64Dtype(),'EFF_STS_APP': pd.Int64Dtype()}
+    dict_df_group={'RENTREE': pd.Int64Dtype(),'ENQ': str,'MINISTER': str,'SECT': str,'COMPOS': str,'NAT_U': str,'SIGLE_U': str,'LIB1_U': str,'LIB2_U': str,'COM_CODE': str,'COM_NOM': str,'COM_CODE1': str,'COM_NOM1': str,'COM_CODE2': str,'COM_NOM2': str,'UUCR_ID': str,'UUCR_NOM': str,'EPCI_ID': str,'DEP_ID': str,'DEP_NUM_NOM': str,'ACA_ID': str,'ACA_NOM': str,'REG_ID': str,'REG_NOM': str,'REG_ID_OLD': str,'REG_NOM_OLD': str,'REGRGP_NOM': str,'FINECOLE': str,'ETABLI': str,'SIGLE_M': str,'LIB1_M': str,'LIB2_M': str,'COM_CODE': str,'COM_CODE_ETAB': str,'UUCR_ID_ETAB': str,'DEP_ID_ETAB': str,'ETABLI2': str,'FORMAT': str,'SPECIUT': str,'LIBELL_': str,'RGP': str,'RGP2': str,'RGP3': str,'RGP4': str,'ING': str,'IUT': str,'INSPE': str,'TOTAL': str,'LMDDONT': str,'LMDDONTBIS': str,'DNDU': str,'DISCIPLI': str,'CURSUS_LMD': str,'FILIERE': str,'ETABLISSEMENT': str,'UNIV': str,'SEXE': str,'memeUUCR': str,'memeCOM': str,'EFFTOT': pd.Int64Dtype(),'EFFSDC': pd.Int64Dtype(),'EFF_STS_APP': pd.Int64Dtype()}
     
     if 'HCPGE' in df.columns:
         df.loc[(df['HCPGE']!=0.0),'EFFSDC']=df.loc[(df['HCPGE']!=0.0),'EFFTOT']
@@ -139,7 +144,7 @@ def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, 
     df.loc[df['COM_U']!=df['COM_M'],'memeCOM']= False
     df=df.loc[(df['DC']== 1.0) & (df['EFFTOT']>0),:]
     df=df.groupby(A, as_index=False, dropna=False).agg({'EFFTOT': 'sum', 'EFFSDC': 'sum', 'EFF_STS_APP': 'sum'}) 
-    communes=pd.DataFrame(CORRECTIFS_dict_esr['LES_COMMUNES'])
+    communes=pd.DataFrame(CORRECTIFS_dict_esr['LES_COMMUNES_26_voir grist'])
     communes['COM_CODE']=communes.loc[:,'COM_CODE'].astype(str)
     df = pd.merge(df[A],communes[B],how= 'left', left_on='COM_U',right_on='COM_CODE')  
     df = pd.merge(df.rename(columns={'COM_M':'COM_CODE_ETAB'}),communes[C].rename(columns={'UUCR_ID':'UUCR_ID_ETAB','DEP_ID':'DEP_ID_ETAB'}),how= 'left', left_on='COM_CODE_ETAB',right_on='COM_CODE')
