@@ -8,8 +8,9 @@ To use it, first:
 
 - create a `INPUT` folder in the root directory with the raw data in it, in .parquet format for each year.
 - create an empty `POST_GENTAB` folder in the root directory.
-- adding new formats of this year in the `format` page of the ATLAS googlesheet here:
+- adding new formats of this year in the `format` page of the ATLAS googlesheet and ESR googlesheet here:
   - `https://docs.google.com/spreadsheet/ccc?key=11NFXSIg6gQMCsMa8zWQQyypvvYBEmfyJfF2yytXqgMk`
+  - `https://docs.google.com/spreadsheets/d/1FwPq5Qw7Gbgj_sBD6Za4dfDDk6ydozQ99TyRjLkW5d8/edit?gid=982088872#gid=982088872`
 - adding new EPE of this year in the `D_EPE` page of the ESR googlesheet here:
   - `https://docs.google.com/spreadsheet/ccc?key=11NFXSIg6gQMCsMa8zWQQyypvvYBEmfyJfF2yytXqgMk`
 
