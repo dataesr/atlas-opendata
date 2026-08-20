@@ -13,6 +13,8 @@ To use it, first:
   - `https://docs.google.com/spreadsheets/d/1FwPq5Qw7Gbgj_sBD6Za4dfDDk6ydozQ99TyRjLkW5d8/edit?gid=982088872#gid=982088872`
 - adding new EPE of this year in the `D_EPE` page of the ESR googlesheet here:
   - `https://docs.google.com/spreadsheet/ccc?key=11NFXSIg6gQMCsMa8zWQQyypvvYBEmfyJfF2yytXqgMk`
+- adding new COM_CODE of this year in the `COM_U` page and  `COM_M` page of the ATLAS googlesheet here:
+  - `https://docs.google.com/spreadsheet/ccc?key=11NFXSIg6gQMCsMa8zWQQyypvvYBEmfyJfF2yytXqgMk`
 
 ## 1. Run the notebook `1_opendata_altlas_features_to_correct.ipynb`
 
