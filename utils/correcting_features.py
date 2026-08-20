@@ -162,7 +162,7 @@ def corrige_format(df, CORRECTIFS_dict):
                     df.loc[(df[VAR] != c['NOT IN']) & (df['ETABLI']==c['ETABLI']) & (df['RENTREE']==c['ANNEE']), VAR]=c['OUT']
                 elif c['TYP_DIPL']!= '' :
                     if c['NOT DIPLOM']!= '' :
-                        df.loc[(df['DIPLOM'] != c['NOT DIPLOM']) & (df['TYP_DIPL']==c['TYP_DIPL']) & (df['ETABLI']==c['ETABLI']) & (df['RENTREE']==c['ANNEE']), VAR]=c['OUT']
+                        df.loc[(df['DIPLOM'] != c['NOT DIPLOM']) & (df['TYP_DIPL']==c['TYP_DIPL']) & (df['ETABLI']==c['ETABLI']), VAR]=c['OUT']
                     else:
                         df.loc[(df['TYP_DIPL']==c['TYP_DIPL']) & (df['ETABLI']==c['ETABLI']) & (df['RENTREE']==c['ANNEE']), VAR]=c['OUT']
                 else:

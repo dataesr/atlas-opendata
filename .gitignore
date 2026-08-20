@@ -3,3 +3,4 @@ POST_GENTAB/*
 OUTPUT_OPENDATA/*
 *.json
 utils/_pycache/*
+.env

@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 
-def importtab(df,CORRECTIFS_dict,CORRECTIFS_dict_esr,corrige_etabli2,corrige_all,annee):
+
+    
+def importtab(df,CORRECTIFS_dict,CORRECTIFS_dict_esr,corrige_etabli2,corrige_all,annee,communes):
     if ('ANNEE' in df.columns) and ('RENTREE' in df.columns):
         df=df.drop(['ANNEE', 'RENTREE'], axis=1)
     df['ANNEE']=str(annee + 1)
@@ -63,6 +65,14 @@ def importtab(df,CORRECTIFS_dict,CORRECTIFS_dict_esr,corrige_etabli2,corrige_all
     df.loc[df['DIPLOM'].isin(['6001000','6004000','8000010']),'LMDDONTBIS']='AUTRES'
      
     df=corrige_all(df, annee, CORRECTIFS_dict)
+ 
+    communes=communes[['COM_CODE','COM_CODE_ACTUEL']]
+    dict_communes={commune['COM_CODE']:commune['COM_CODE_ACTUEL'] for commune in communes[communes.COM_CODE_ACTUEL!=''].to_dict('records')}
+    for k,v in dict_communes.items():
+        df.loc[df.COM_U== k,'COM_U']=v
+        df.loc[df.COM_M== k,'COM_M']=v
+        
+    df.loc[df['COM_U']=='soc','ETABLISSEMENT']
     if annee==2017:
         df.loc[df['FORMAT']=='soc','ETABLISSEMENT']='social'
         df.loc[df['FORMAT']=='san','ETABLISSEMENT']='paramedica'
@@ -103,7 +113,7 @@ def importtab(df,CORRECTIFS_dict,CORRECTIFS_dict_esr,corrige_etabli2,corrige_all
         df.loc[df.COMPOS=='9830642F','ETABLISSEMENT']='commerce'
     return df
 
-def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, corrige_rgp3, corrige_op_ing):
+def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, corrige_rgp3, corrige_op_ing,communes):
     if rentree_sco >= 2021:
         a='rentree, a.dc, a.enq, a.MINISTER, a.sect, a.compos, a.nat_u, a.sigle_u, a.lib1_u, a.lib2_u, a.FINECOLE, a.etabli, a.sigle_m, a.lib1_m, a.lib2_m, a.com_u, a.com_m, a.etabli2, a.speciut, a.efftot, a.EFF_STS_APP, a.EFFSDC, a.sexe, a.univ, a.LMDdont, a.LMDdontbis, a.DNDU, a.DISCIPLI, a.CURSUS_LMD, a.filiere, a.etablissement, a.format, a.degetu' 
     else:
@@ -144,7 +154,7 @@ def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, 
     df.loc[df['COM_U']!=df['COM_M'],'memeCOM']= False
     df=df.loc[(df['DC']== 1.0) & (df['EFFTOT']>0),:]
     df=df.groupby(A, as_index=False, dropna=False).agg({'EFFTOT': 'sum', 'EFFSDC': 'sum', 'EFF_STS_APP': 'sum'}) 
-    communes=pd.DataFrame(CORRECTIFS_dict_esr['LES_COMMUNES_26_voir grist'])
+    
     communes['COM_CODE']=communes.loc[:,'COM_CODE'].astype(str)
     df = pd.merge(df[A],communes[B],how= 'left', left_on='COM_U',right_on='COM_CODE')  
     df = pd.merge(df.rename(columns={'COM_M':'COM_CODE_ETAB'}),communes[C].rename(columns={'UUCR_ID':'UUCR_ID_ETAB','DEP_ID':'DEP_ID_ETAB'}),how= 'left', left_on='COM_CODE_ETAB',right_on='COM_CODE')
@@ -180,3 +190,6 @@ def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, 
     df.loc[(df.ETABLI=='0753471R')&(df.RGP3!='STS'),"RGP3"]="GE" #CNAM 
     return df
 
+def remplacer_nan_par_vide(df):
+    df.fillna("", inplace=True)
+    return df
