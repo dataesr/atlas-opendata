@@ -1,116 +1,140 @@
-import numpy as np
 import pandas as pd
+import numpy as np
 
+def importtab(
+    df,
+    CORRECTIFS_dict,
+    CORRECTIFS_dict_esr,
+    corrige_etabli2,
+    corrige_all,
+    annee,
+    communes
+):
 
-    
-def importtab(df,CORRECTIFS_dict,CORRECTIFS_dict_esr,corrige_etabli2,corrige_all,annee,communes):
-    if ('ANNEE' in df.columns) and ('RENTREE' in df.columns):
-        df=df.drop(['ANNEE', 'RENTREE'], axis=1)
-    df['ANNEE']=str(annee + 1)
-    df['RENTREE']=str(annee)
-    df['ETABLI']=df.loc[:,'ETABLI'].astype(str)
-    df['COMPOS']=df.loc[:,'COMPOS'].astype(str)
-    if 'CURSUS_LMD' in df.columns :
-        df['CURSUS_LMD']=df.loc[:,'CURSUS_LMD'].astype(str)
-    df['SECT']=df.loc[:,'SECT'].astype(str)
-    df['FORMAT']=df.loc[:,'FORMAT'].astype(str)
-    df['ACA_U']=df.loc[:,'ACA_U'].astype(str)
-    if 'MIN_U' in df.columns :
-        df['MINISTER']=df.loc[:,'MIN_U'].astype(str)
-    if 'MIN_M' in df.columns :
-        df['MIN_M']=df.loc[:,'MIN_M'].astype(str)
-    df['FINECOLE']=df.loc[:,'FINECOLE'].astype(str)
-    df['COM_U']=df.loc[:,'COM_U'].astype(str)
-    df['COM_M']=df.loc[:,'COM_M'].astype(str)
-    df['DIPLOM']=df.loc[:,'DIPLOM'].astype(str)
-    df['DISCIPLI']=df.loc[:,'DISCIPLI'].astype(str)
-    df[['EFFTOT']]=df[['EFFTOT']].apply(pd.to_numeric)
+    # --- 1. Nettoyage initial des colonnes ---
+    if {'ANNEE', 'RENTREE'}.issubset(df.columns):
+        df = df.drop(['ANNEE', 'RENTREE'], axis=1)
+    df['ANNEE'] = str(annee + 1)
+    df['RENTREE'] = str(annee)
 
-    if 'DNDU' not in df.columns :
-        df['DNDU']=df.apply(lambda x: np.nan,axis=1)
-    if 'DISCIPLI' not in df.columns :
-        df['DISCIPLI']=df.apply(lambda x: np.nan,axis=1)
-    if 'CURSUS_LMD' not in df.columns :
-        df['CURSUS_LMD']=df.apply(lambda x: np.nan,axis=1)
-    if 'FILIERE' not in df.columns :
-        df['FILIERE']=df.apply(lambda x: np.nan,axis=1)
-    if 'ETABLISSEMENT' not in df.columns :
-        df['ETABLISSEMENT']=df.apply(lambda x: np.nan,axis=1)
-    if 'UNIV' not in df.columns :
-        df['UNIV']=df.apply(lambda x: np.nan,axis=1)
-    if 'HSIFA' not in df.columns :
-        df['HSIFA']=df.apply(lambda x: np.nan,axis=1)
-    if 'HCPGE' not in df.columns :
-        df['EFFECTIF_SANS_DOUBLE_COMPTE']=df.apply(lambda x: 0,axis=1)
-        df['HCPGE']=df.apply(lambda x: 0,axis=1) 
-    if 'DC' not in df.columns :
-        df['DC']=df.apply(lambda x: 1,axis=1)
-        
-    dutbut=pd.DataFrame(CORRECTIFS_dict_esr['O_DUTBUT'])
+    # --- 2. Conversion des colonnes en str ---
+    str_columns = [
+        'ETABLI', 'COMPOS', 'CURSUS_LMD', 'SECT', 'FORMAT', 'ACA_U',
+        'MIN_U', 'MIN_M', 'FINECOLE', 'COM_U', 'COM_M', 'DIPLOM', 'DISCIPLI'
+    ]
+    for col in str_columns:
+        if col in df.columns:
+            df[col] = df[col].astype(str)
+
+    # --- 3. Ajout des colonnes manquantes ---
+    missing_columns = {
+        'DNDU': np.nan,
+        'DISCIPLI': np.nan,
+        'CURSUS_LMD': np.nan,
+        'FILIERE': np.nan,
+        'ETABLISSEMENT': np.nan,
+        'UNIV': np.nan,
+        'HSIFA': np.nan,
+        'EFFECTIF_SANS_DOUBLE_COMPTE': 0,
+        'HCPGE': 0,
+        'DC': 1
+    }
+    for col, default in missing_columns.items():
+        if col not in df.columns:
+            df[col] = default
+
+    # --- 4. Conversion de EFFTOT en numérique ---
+    if 'EFFTOT' in df.columns:
+        df['EFFTOT'] = pd.to_numeric(df['EFFTOT'])
+
+    # --- 5. Corrections spécifiques ---
+    # 5.1. Correspondance IUT
+    dutbut = pd.DataFrame(CORRECTIFS_dict_esr['O_DUTBUT'])
     dutbut['DIPLOM'] = dutbut['DIPLOM'].astype(str)
-    df = pd.merge(df,dutbut[['DIPLOM','CORRESPONDANCEIUT']].rename(columns={'CORRESPONDANCEIUT':'SPECIUT'}),how= 'left', on='DIPLOM') 
-    df['SPECIUT']=df['SPECIUT'].apply(lambda x: 'AUTRES' if pd.isna(x) else x)
-    df.loc[df['TYP_DIPL'].isin(["01","02","04","05","06","07","08","09","17","UA","UB","UC","UD","UE","UF","UG","UI","UJ","UO","UR","US","UT","UU","UV","UY","XF"]),'DNDU']='DU'
-    df.loc[~(df['TYP_DIPL'].isin(["01","02","04","05","06","07","08","09","17","UA","UB","UC","UD","UE","UF","UG","UI","UJ","UO","UR","US","UT","UU","UV","UY","XF"])),'DNDU']='DN'
-    lmddont=pd.DataFrame(CORRECTIFS_dict_esr['J_LMDDONT'])
-    df['TYP_DIPL']=df.loc[:,'TYP_DIPL'].apply(lambda x: 'TYPE_NA' if x=='NA' else x)
-    df = pd.merge(df,lmddont,how= 'left', on='TYP_DIPL')
-    df['LMDDONT']=df['LMDDONT'].apply(lambda x: 'AUTRES' if pd.isna(x)==True else x)
-    df['LMDDONTBIS']=df['LMDDONTBIS'].apply(lambda x: 'AUTRES' if pd.isna(x)==True else x)
-    df.loc[df['DNDU']=='DU','LMDDONTBIS']='DU'
-    dg_disc=pd.DataFrame(CORRECTIFS_dict_esr['DISCIPLINES_SISE'])[['GDDISC','DISCIPLI']].drop_duplicates()
-    df = pd.merge(df,dg_disc,how= 'left', on='DISCIPLI').drop(['DISCIPLI'], axis=1).rename(columns={'GDDISC':'DISCIPLI'})
-    df['DISCIPLI']=df['DISCIPLI'].apply(lambda x: 'AUTRES' if pd.isna(x) else x)
-    df.loc[df['DIPLOM'].isin(['6001000','6004000','8000010']),'LMDDONT']='AUTRES'
-    df.loc[df['DIPLOM'].isin(['6001000','6004000','8000010']),'LMDDONTBIS']='AUTRES'
-     
-    df=corrige_all(df, annee, CORRECTIFS_dict)
- 
-    communes=communes[['COM_CODE','COM_CODE_ACTUEL']]
-    dict_communes={commune['COM_CODE']:commune['COM_CODE_ACTUEL'] for commune in communes[communes.COM_CODE_ACTUEL!=''].to_dict('records')}
-    for k,v in dict_communes.items():
-        df.loc[df.COM_U== k,'COM_U']=v
-        df.loc[df.COM_M== k,'COM_M']=v
-        
-    df.loc[df['COM_U']=='soc','ETABLISSEMENT']
-    if annee==2017:
-        df.loc[df['FORMAT']=='soc','ETABLISSEMENT']='social'
-        df.loc[df['FORMAT']=='san','ETABLISSEMENT']='paramedica'
-    if annee==2016:
-        df.loc[(df['COMPOS']=='0684045X'),'COMPOS']='0694045X'
-        df.loc[(df['COMPOS']=='0684045X'),'MIN_M']='06'
-        df.loc[(df['COMPOS']=='0684045X'),'MIN_U']='06'
-        df.loc[(df['COMPOS']=='0684045X'),'NAT_M']='440'
-        df.loc[(df['COMPOS']=='0684045X'),'NAT_U']='440'
-    if annee==2015:   
-        df.loc[(df['COMPOS']=='0755359T')& (pd.isna(df['MIN_M'])),'MIN_U']='38'
-        df.loc[(df['COMPOS']=='0755359T')& (pd.isna(df['MIN_M'])),'MIN_M']='38'
-        df.loc[(df['COMPOS']=='0161192P')& (pd.isna(df['MIN_M'])),'MIN_U']='38'
-        df.loc[(df['COMPOS']=='0161192P')& (pd.isna(df['MIN_M'])),'MIN_M']='38'
-    if annee==2015:    
-        df.loc[(df['COMPOS']=='0410981U'),'COM_M']='18033'
-        df.loc[(df['COMPOS']=='0410981U'),'DEP_ID_etab']='D018'
-    if annee==2013:
-        df.loc[((df['ETABLI'] == "0692459Y")|(df['ETABLI'] == "0753478Y")|(df['ETABLI'] == "0753486G")|(df['ETABLI'] == "0753494R")|(df['ETABLI'] == "0753742K")|(df['ETABLI'] == "0133968T")|(df['ETABLI'] == "0782019W")),'SECT']='PU'
-        df.loc[(df['COMPOS']=='0490890B'),'SECT']='PU'
-        df.loc[(df['FORMAT']=='CPESn') & (df['CPESN'] > 0) & (df['CPESN'] != df['EFFTOTN']),'EFFTOTN']=df.loc[(df['FORMAT']=='CPESn') & (df['CPESN'] > 0) & (df['CPESN'] != df['EFFTOTN']),'CPESN']
-    if annee==2012:
-        df.loc[(df['COMPOS']=='0490890B'),'SECT']='PU'
-        df.loc[(df['FORMAT']=='CPESn') & (df['CPESN'] > 0) & (df['CPESN'] != df['EFFTOTN']),'EFFTOTN']=df.loc[(df['FORMAT']=='CPESn') & (df['CPESN'] > 0) & (df['CPESN'] != df['EFFTOTN']),'CPESN']
-    df.loc[df['COMPOS']=='0673064S','SECT']='PR'
-    df.loc[df['ETABLI']=='0772517T','MINISTER']='23'
-    df['ETABLI2']=df.loc[:,'ETABLI']
-    df['ETABLI2']=df.loc[:,'ETABLI2'].astype(str)
-    df=corrige_etabli2(df, CORRECTIFS_dict)
-    df.loc[(df['ETABLI']=='0753541S'),'SECT']='PR'
-    final_columns=['ANNEE','DEGETU','PAYS_ID','DIPLOM','RENTREE','ENQ','MIN_U', 'MINISTER','SECT','COMPOS','NAT_U','SIGLE_U','LIB1_U','LIB2_U','COM_U','FINECOLE','ETABLI','ETABLI2','ETABLI3','SIGLE_M','LIB1_M','LIB2_M','COM_M','SPECIUT','EFFTOT','EFFTOTN','DC','LMDDONT','LMDDONTBIS','DNDU','DISCIPLI','CURSUS_LMD','FILIERE','ETABLISSEMENT','UNIV','HSIFA','EFFECTIF_SANS_DOUBLE_COMPTE','HCPGE','SEXE','NATION','FORMAT']
-    columns=[ x for x in df.columns if x in final_columns]
-    df=df[columns]
-    if len(df[df.FORMAT=='None'])>0:
-        df.loc[df.FORMAT=='None','FORMAT']='autr'
-    if len(df[df.FORMAT==''])>0:
-        df.loc[df.FORMAT=='','FORMAT']='com1'
-        df.loc[df.COMPOS=='9830642F','ETABLISSEMENT']='commerce'
+    df = pd.merge(
+        df,
+        dutbut[['DIPLOM', 'CORRESPONDANCEIUT']].rename(columns={'CORRESPONDANCEIUT': 'SPECIUT'}),
+        how='left',
+        on='DIPLOM'
+    )
+    df['SPECIUT'] = df['SPECIUT'].fillna('AUTRES')
+
+    # 5.2. Détermination de DNDU
+    dndu_diplomes = ["01","02","04","05","06","07","08","09","17","UA","UB","UC","UD","UE","UF","UG","UI","UJ","UO","UR","US","UT","UU","UV","UY","XF"]
+    df['DNDU'] = np.where(df['TYP_DIPL'].isin(dndu_diplomes), 'DU', 'DN')
+
+    # 5.3. Correspondance LMD
+    lmddont = pd.DataFrame(CORRECTIFS_dict_esr['J_LMDDONT'])
+    df['TYP_DIPL'] = df['TYP_DIPL'].replace('NA', 'TYPE_NA')
+    df = pd.merge(df, lmddont, how='left', on='TYP_DIPL')
+    df['LMDDONT'] = df['LMDDONT'].fillna('AUTRES')
+    df['LMDDONTBIS'] = df['LMDDONTBIS'].fillna('AUTRES')
+    df.loc[df['DNDU'] == 'DU', 'LMDDONTBIS'] = 'DU'
+
+    # 5.4. Correspondance DISCIPLINES_SISE
+    dg_disc = pd.DataFrame(CORRECTIFS_dict_esr['DISCIPLINES_SISE'])[['GDDISC', 'DISCIPLI']].drop_duplicates()
+    df = pd.merge(df, dg_disc, how='left', on='DISCIPLI').drop(['DISCIPLI'], axis=1).rename(columns={'GDDISC': 'DISCIPLI'})
+    df['DISCIPLI'] = df['DISCIPLI'].fillna('AUTRES')
+
+    # 5.5. Corrections spécifiques pour certains diplômes
+    special_diplomes = ['6001000','6004000','8000010']
+    df.loc[df['DIPLOM'].isin(special_diplomes), ['LMDDONT', 'LMDDONTBIS']] = 'AUTRES'
+
+    # --- 6. Application des corrections globales ---
+    df = corrige_all(df, annee, CORRECTIFS_dict)
+
+    # --- 7. Mise à jour des codes communes ---
+    communes = communes[['COM_CODE', 'COM_CODE_ACTUEL']]
+    dict_communes = communes[communes['COM_CODE_ACTUEL'] != ''].set_index('COM_CODE')['COM_CODE_ACTUEL'].to_dict()
+    df['COM_U'] = df['COM_U'].map(dict_communes).fillna(df['COM_U'])
+    df['COM_M'] = df['COM_M'].map(dict_communes).fillna(df['COM_M'])
+
+    # --- 8. Corrections spécifiques par année ---
+    if annee == 2017:
+        df.loc[df['FORMAT'] == 'soc', 'ETABLISSEMENT'] = 'social'
+        df.loc[df['FORMAT'] == 'san', 'ETABLISSEMENT'] = 'paramedica'
+    elif annee == 2016:
+        mask = df['COMPOS'] == '0684045X'
+        df.loc[mask, ['COMPOS', 'MIN_M', 'MIN_U', 'NAT_M', 'NAT_U']] = ['0694045X', '06', '06', '440', '440']
+    elif annee == 2015:
+        mask1 = (df['COMPOS'] == '0755359T') & (df['MIN_M'].isna())
+        mask2 = (df['COMPOS'] == '0161192P') & (df['MIN_M'].isna())
+        df.loc[mask1 | mask2, ['MIN_U', 'MIN_M']] = '38'
+        df.loc[df['COMPOS'] == '0410981U', ['COM_M', 'DEP_ID_etab']] = ['18033', 'D018']
+    elif annee == 2013:
+        etabli_list = ["0692459Y", "0753478Y", "0753486G", "0753494R", "0753742K", "0133968T", "0782019W"]
+        df.loc[df['ETABLI'].isin(etabli_list), 'SECT'] = 'PU'
+        df.loc[df['COMPOS'] == '0490890B', 'SECT'] = 'PU'
+        mask_cpes = (df['FORMAT'] == 'CPESn') & (df['CPESN'] > 0) & (df['CPESN'] != df['EFFTOTN'])
+        df.loc[mask_cpes, 'EFFTOTN'] = df.loc[mask_cpes, 'CPESN']
+    elif annee == 2012:
+        df.loc[df['COMPOS'] == '0490890B', 'SECT'] = 'PU'
+        mask_cpes = (df['FORMAT'] == 'CPESn') & (df['CPESN'] > 0) & (df['CPESN'] != df['EFFTOTN'])
+        df.loc[mask_cpes, 'EFFTOTN'] = df.loc[mask_cpes, 'CPESN']
+
+    # --- 9. Corrections ponctuelles ---
+    df.loc[df['COMPOS'] == '0673064S', 'SECT'] = 'PR'
+    df.loc[df['ETABLI'] == '0772517T', 'MINISTER'] = '23'
+    df['ETABLI2'] = df['ETABLI'].astype(str)
+    df = corrige_etabli2(df, CORRECTIFS_dict)
+    df.loc[df['ETABLI'] == '0753541S', 'SECT'] = 'PR'
+
+    # --- 10. Sélection des colonnes finales ---
+    final_columns = [
+        'ANNEE', 'DEGETU', 'PAYS_ID', 'DIPLOM', 'RENTREE', 'ENQ', 'MIN_U', 'MINISTER', 'SECT',
+        'COMPOS', 'NAT_U', 'SIGLE_U', 'LIB1_U', 'LIB2_U', 'COM_U', 'FINECOLE', 'ETABLI',
+        'ETABLI2', 'ETABLI3', 'SIGLE_M', 'LIB1_M', 'LIB2_M', 'COM_M', 'SPECIUT', 'EFFTOT',
+        'EFFTOTN', 'DC', 'LMDDONT', 'LMDDONTBIS', 'DNDU', 'DISCIPLI', 'CURSUS_LMD', 'FILIERE',
+        'ETABLISSEMENT', 'UNIV', 'HSIFA', 'EFFECTIF_SANS_DOUBLE_COMPTE', 'HCPGE', 'SEXE',
+        'NATION', 'FORMAT'
+    ]
+    df = df[[col for col in final_columns if col in df.columns]]
+
+    # --- 11. Corrections finales sur FORMAT ---
+    df.loc[df['FORMAT'] == 'None', 'FORMAT'] = 'autr'
+    df.loc[df['FORMAT'] == '', 'FORMAT'] = 'com1'
+    df.loc[df['COMPOS'] == '9830642F', 'ETABLISSEMENT'] = 'commerce'
+
     return df
 
 def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, corrige_rgp3, corrige_op_ing,communes):
