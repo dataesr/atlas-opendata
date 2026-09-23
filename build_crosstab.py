@@ -105,17 +105,7 @@ def build_annual_crosstab_from_atlas_json(
     folder: str,
     output_path: str,
     years: range = range(2001, 2026),
-    template: str = "atlas{annee}.json",
-) -> str:
-    """
-    Convention de nommage : ./POST_IMPORTTAB/atlas{rentree_sco}.json
-    (ex: atlas2025.json), rentree_sco étant l'année en string.
-
-    Exemple :
-        build_annual_crosstab_from_atlas_json(
-            "./POST_IMPORTTAB", "resultat.xlsx"
-        )
-    """
+    template: str = "atlas{annee}.json"):
     files = {}
     for year in years:
         path = os.path.join(folder, template.format(annee=year))
