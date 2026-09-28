@@ -168,12 +168,13 @@ def corrige_format(df, CORRECTIFS_dict):
                 else:
                     df.loc[(df['ETABLI']==c['ETABLI']) & (df['RENTREE']==c['ANNEE']), VAR]=c['OUT']
         else:
-            dict_etabli={'0381912X':['2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016',
-                                     '2017', '2018', '2019', '2020', '2021', '2022','2023','2024','2025','2026']}
-            if c['IN']!= '' and c['IN'] in list(dict_etabli.keys()):
-                for annee in dict_etabli[c['IN']] :
-                    df.loc[(df[VAR] == c['IN']) & (df['ETABLI']==c['ETABLI']) & (df['ANNEE']==annee), VAR]=c['OUT']
-            elif c['IN']!= '' and c['IN'] not in list(dict_etabli.keys()):
+            dict_etabli={'0381912X':['2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016',
+                                     '2017', '2018', '2019', '2020', '2021', '2022','2023','2024','2025']}
+            if c['ETABLI'] in list(dict_etabli.keys()):
+                if c['NOT DIPLOM']!= '' :
+                    for annee in dict_etabli[c['IN']] :
+                        df.loc[(df['DIPLOM'] != c['NOT DIPLOM']) & (df['TYP_DIPL']==c['TYP_DIPL']) & (df['ETABLI']==c['ETABLI']) & (df['ANNEE']==annee), VAR]=c['OUT']
+            elif c['IN']!= '' :
                 df.loc[(df[VAR] == c['IN']) & (df['ETABLI']==c['ETABLI']), VAR]=c['OUT']
             else:
                 df.loc[(df[VAR] != c['NOT IN']) & (df['ETABLI']==c['ETABLI']), VAR]=c['OUT']
