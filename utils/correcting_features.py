@@ -172,7 +172,7 @@ def corrige_format(df, CORRECTIFS_dict):
                                      '2017', '2018', '2019', '2020', '2021', '2022','2023','2024','2025']}
             if c['ETABLI'] in list(dict_etabli.keys()):
                 if c['NOT DIPLOM']!= '' :
-                    for annee in dict_etabli[c['IN']] :
+                    for annee in dict_etabli[c['ETABLI']] :
                         df.loc[(df['DIPLOM'] != c['NOT DIPLOM']) & (df['TYP_DIPL']==c['TYP_DIPL']) & (df['ETABLI']==c['ETABLI']) & (df['ANNEE']==annee), VAR]=c['OUT']
             elif c['IN']!= '' :
                 df.loc[(df[VAR] == c['IN']) & (df['ETABLI']==c['ETABLI']), VAR]=c['OUT']
