@@ -40,6 +40,10 @@ def importtab(
         if col not in df.columns:
             df[col] = default
 
+    for col in ['ETABLISSEMENT', 'MINISTER', 'NAT_M', 'NAT_U', 'DEP_ID_etab', 'FILIERE', 'UNIV']:
+        if col in df.columns:
+            df[col] = df[col].astype(object)
+
     if 'EFFTOT' in df.columns:
         df['EFFTOT'] = pd.to_numeric(df['EFFTOT'])
 
@@ -51,7 +55,7 @@ def importtab(
         how='left',
         on='DIPLOM'
     )
-    df['SPECIUT'] = df['SPECIUT'].fillna('AUTRES')
+    df['SPECIUT'] = df['SPECIUT'].astype(object).fillna('AUTRES')
 
     dndu_diplomes = ["01","02","04","05","06","07","08","09","17","UA","UB","UC","UD","UE","UF","UG","UI","UJ","UO","UR","US","UT","UU","UV","UY","XF"]
     df['DNDU'] = np.where(df['TYP_DIPL'].isin(dndu_diplomes), 'DU', 'DN')
@@ -59,13 +63,13 @@ def importtab(
     lmddont = pd.DataFrame(CORRECTIFS_dict_esr['J_LMDDONT'])
     df['TYP_DIPL'] = df['TYP_DIPL'].replace('NA', 'TYPE_NA')
     df = pd.merge(df, lmddont, how='left', on='TYP_DIPL')
-    df['LMDDONT'] = df['LMDDONT'].fillna('AUTRES')
-    df['LMDDONTBIS'] = df['LMDDONTBIS'].fillna('AUTRES')
+    df['LMDDONT'] = df['LMDDONT'].astype(object).fillna('AUTRES')
+    df['LMDDONTBIS'] = df['LMDDONTBIS'].astype(object).fillna('AUTRES')
     df.loc[df['DNDU'] == 'DU', 'LMDDONTBIS'] = 'DU'
 
     dg_disc = pd.DataFrame(CORRECTIFS_dict_esr['DISCIPLINES_SISE'])[['GDDISC', 'DISCIPLI']].drop_duplicates()
     df = pd.merge(df, dg_disc, how='left', on='DISCIPLI').drop(['DISCIPLI'], axis=1).rename(columns={'GDDISC': 'DISCIPLI'})
-    df['DISCIPLI'] = df['DISCIPLI'].fillna('AUTRES')
+    df['DISCIPLI'] = df['DISCIPLI'].astype(object).fillna('AUTRES')
 
     special_diplomes = ['6001000','6004000','8000010']
     df.loc[df['DIPLOM'].isin(special_diplomes), ['LMDDONT', 'LMDDONTBIS']] = 'AUTRES'
@@ -99,6 +103,9 @@ def importtab(
         mask_cpes = (df['FORMAT'] == 'CPESn') & (df['CPESN'] > 0) & (df['CPESN'] != df['EFFTOTN'])
         df.loc[mask_cpes, 'EFFTOTN'] = df.loc[mask_cpes, 'CPESN']
 
+    for col in ['SECT', 'MINISTER']:
+        if col in df.columns:
+            df[col] = df[col].astype(object)
     df.loc[df['COMPOS'] == '0673064S', 'SECT'] = 'PR'
     df.loc[df['ETABLI'] == '0772517T', 'MINISTER'] = '23'
     df['ETABLI2'] = df['ETABLI'].astype(str)
@@ -113,13 +120,15 @@ def importtab(
         'ETABLISSEMENT', 'UNIV', 'HSIFA', 'EFFECTIF_SANS_DOUBLE_COMPTE', 'HCPGE', 'SEXE',
         'NATION', 'FORMAT'
     ]
-    df = df[[col for col in final_columns if col in df.columns]]
+    df = df[[col for col in final_columns if col in df.columns]].copy()
 
+    df['ETABLISSEMENT'] = df['ETABLISSEMENT'].astype(object)
+    df['FORMAT'] = df['FORMAT'].astype(object)
+    df['COMPOS'] = df['COMPOS'].astype(object)
     df.loc[df['FORMAT'] == 'None', 'FORMAT'] = 'autr'
     df.loc[df['FORMAT'] == '', 'FORMAT'] = 'com1'
     df.loc[df['COMPOS'] == '9830642F', 'ETABLISSEMENT'] = 'commerce'
     df.loc[df['COMPOS'] == '62010966','COMPOS'] = '0624064F'
-    df=df.loc[(df['DC']== 1.0) & (df['EFFTOT']>0),:]
 
     return df
 
@@ -160,6 +169,7 @@ def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, 
     else:
         df['EFF_STS_APP']=df.apply(lambda x: np.nan,axis=1)
 
+    df['memeCOM']=pd.Series(dtype=object)
     df.loc[df['COM_U']==df['COM_M'],'memeCOM']=True
     df.loc[df['COM_U']!=df['COM_M'],'memeCOM']= False
     df=df.loc[(df['DC']== 1.0) & (df['EFFTOT']>0),:]
@@ -170,6 +180,7 @@ def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, 
     df = pd.merge(df.rename(columns={'COM_M':'COM_CODE_ETAB'}),communes[C].rename(columns={'UUCR_ID':'UUCR_ID_ETAB','DEP_ID':'DEP_ID_ETAB'}),how= 'left', left_on='COM_CODE_ETAB',right_on='COM_CODE')
     del df['COM_CODE_y']
     df=df.rename(columns={'COM_CODE_x':'COM_CODE'})
+    df['memeUUCR']=pd.Series(dtype=object)
     df.loc[df['UUCR_ID']==df['UUCR_ID_ETAB'],'memeUUCR']=True
     df.loc[df['UUCR_ID']!=df['UUCR_ID_ETAB'],'memeUUCR']= False
 
@@ -189,6 +200,9 @@ def gentab(df, rentree_sco, CORRECTIFS_dict, CORRECTIFS_dict_esr, corrige_rgp2, 
     df=df.groupby(H, as_index=False, dropna=False).agg({'EFFTOT': 'sum', 'EFFSDC': 'sum', 'EFF_STS_APP': 'sum'}) 
     df=corrige_rgp2(df,str(rentree_sco), CORRECTIFS_dict)
     df=corrige_rgp3(df,str(rentree_sco), CORRECTIFS_dict)
+    for col in ['ING', 'IUT', 'INSPE', 'SECT', 'RGP3']:
+        if col in df.columns:
+            df[col] = df[col].astype(object)
     df.loc[((df['ING'] == '')|(pd.isna(df['ING'])) |(df['ING']==None)|(df['ING']=='None')),'ING']='NO_ING'
     df.loc[((df['IUT'] == '')|(pd.isna(df['IUT'])) |(df['IUT']==None)|(df['IUT']=='None')),'IUT']='NO_IUT'
     df.loc[((df['INSPE'] == '')|(pd.isna(df['INSPE'])) |(df['INSPE']==None)),'INSPE']='NO_INSPE'

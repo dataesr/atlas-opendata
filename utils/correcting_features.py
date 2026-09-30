@@ -5,6 +5,8 @@ def corrige_com_u(df, CORRECTIFS_dict):
     df['COM_U']=df['COM_U'].astype('str')
     VAR = 'COM_U'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if c['ANNEE']!= '' :
             if c['COMPOS']!= '' :
@@ -34,6 +36,8 @@ def corrige_com_m(df, CORRECTIFS_dict):
     df['COM_M']=df['COM_M'].astype('str')
     VAR = 'COM_M'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if c['ANNEE']!= '' :
             if c['COMPOS']!= '' :
@@ -73,6 +77,8 @@ def corrige_com_m(df, CORRECTIFS_dict):
 def corrige_etabli(df, CORRECTIFS_dict):
     VAR = 'ETABLI'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if c['ANNEE']!= '' :
             if c['COMPOS']!= '' :
@@ -102,6 +108,8 @@ def corrige_minister(df, annee, CORRECTIFS_dict):
     VAR = 'MINISTER'
     print(VAR)
     if annee >= 2004 :
+        if VAR in df.columns:
+            df[VAR] = df[VAR].astype(object)
         for c in CORRECTIFS_dict[VAR]:
             if c['ANNEE']!= '' :
                 df.loc[df['RENTREE']==c['ANNEE'], VAR]=df.loc[df['RENTREE']==c['ANNEE'],c['OUT']]
@@ -122,6 +130,8 @@ def corrige_nation(df,annee, CORRECTIFS_dict):
     VAR = 'NATION'
     print(VAR)
     if annee >= 2015:
+        if VAR in df.columns:
+            df[VAR] = df[VAR].astype(object)
         for c in CORRECTIFS_dict[VAR]:
             df.loc[(df['RENTREE']==c['ANNEE']), VAR]=df.loc[(df['RENTREE']==c['ANNEE']), c['OUT']]
     else:
@@ -131,6 +141,8 @@ def corrige_nation(df,annee, CORRECTIFS_dict):
 def corrige_etabli2(df, CORRECTIFS_dict):
     VAR = 'ETABLI2'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if c['COMPOS']!= '' :
             df.loc[(df['COMPOS']==c['COMPOS']) & (df['RENTREE']==c['ANNEE']), VAR]=c['OUT']
@@ -144,6 +156,8 @@ def corrige_etabli2(df, CORRECTIFS_dict):
 def corrige_format(df, CORRECTIFS_dict):
     VAR = 'FORMAT'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if c['ANNEE']!= '' :
             if c['SECT']!= '' :
@@ -183,6 +197,8 @@ def corrige_format(df, CORRECTIFS_dict):
 def corrige_cursus_lmd(df, CORRECTIFS_dict):
     VAR = 'CURSUS_LMD'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if c['ANNEE']!= '' :
             if c['ETABLI']!= '' :
@@ -206,6 +222,8 @@ def corrige_cursus_lmd(df, CORRECTIFS_dict):
 def corrige_discipli(df, CORRECTIFS_dict):
     VAR = 'DISCIPLI'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if c['ETABLI']!= '' :
             df.loc[(df[VAR] == c['IN']) & (df['ETABLI']==c['ETABLI']) & (df['RENTREE']==c['ANNEE']), VAR]=c['OUT']
@@ -221,6 +239,8 @@ def corrige_discipli(df, CORRECTIFS_dict):
 def corrige_rgp2(df, annee, CORRECTIFS_dict):
     VAR = 'RGP2'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         df.loc[(df['ETABLI']==c['ETABLI']) & (annee==c['ANNEE']), VAR]=c['OUT']
     return df
@@ -228,6 +248,8 @@ def corrige_rgp2(df, annee, CORRECTIFS_dict):
 def corrige_rgp3(df, annee, CORRECTIFS_dict):
     VAR = 'RGP3'
     print(VAR)
+    if VAR in df.columns:
+        df[VAR] = df[VAR].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if c['NOT IN']== '' :
             df.loc[(df['ETABLI']==c['ETABLI']) & (annee==c['ANNEE']), VAR]=c['OUT']
@@ -238,6 +260,9 @@ def corrige_rgp3(df, annee, CORRECTIFS_dict):
 def corrige_op_ing(df, annee, CORRECTIFS_dict):
     VAR = 'OP_ING'
     print(VAR)
+    for col in ['RGP3', 'RGP4']:
+        if col in df.columns:
+            df[col] = df[col].astype(object)
     for c in CORRECTIFS_dict[VAR]:
         if annee in range(int(c['DEB']),int(c['FIN'])+1,1):
             df.loc[(df['COMPOS']==c['COMPOS'])&(df['ING']=='ING'), 'RGP3']='ING_autres'
@@ -248,5 +273,3 @@ def corrige_op_ing(df, annee, CORRECTIFS_dict):
 
 def corrige_all(df,annee,CORRECTIFS_dict):
     return corrige_cursus_lmd(corrige_nation(corrige_minister(corrige_format(corrige_discipli(corrige_etabli(corrige_com_m(corrige_com_u(df, CORRECTIFS_dict), CORRECTIFS_dict), CORRECTIFS_dict), CORRECTIFS_dict), CORRECTIFS_dict),annee, CORRECTIFS_dict),annee, CORRECTIFS_dict), CORRECTIFS_dict)
-
-
